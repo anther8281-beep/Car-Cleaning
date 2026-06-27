@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
 import { BookingForm } from "./booking-form";
+import { QuoteNote } from "@/components/quote-note";
 
 export const metadata: Metadata = { title: "Book an Appointment" };
 
@@ -21,6 +22,8 @@ export default async function BookingPage({
       <p className="mt-2 text-[var(--muted)]">
         Choose a service and a time. We&apos;ll confirm your request by email.
       </p>
+
+      <QuoteNote className="mt-4" />
 
       <div className="mt-8">
         <BookingForm

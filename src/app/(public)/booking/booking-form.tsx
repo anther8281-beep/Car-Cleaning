@@ -117,6 +117,10 @@ export function BookingForm({
           Thanks for booking. We&apos;ve emailed you a confirmation and will
           notify you once your appointment is approved.
         </p>
+        <p className="mt-2 text-xs text-green-700">
+          Your final quote will be provided in person and depends on your
+          vehicle&apos;s size and condition.
+        </p>
         <button
           type="button"
           onClick={() => router.push("/")}

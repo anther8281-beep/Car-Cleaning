@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/settings";
+import { QuoteNote } from "@/components/quote-note";
 
 export default async function HomePage() {
   const settings = await getSettings();
@@ -72,6 +73,7 @@ export default async function HomePage() {
             </div>
           ))}
         </div>
+        <QuoteNote className="mx-auto mt-8 max-w-2xl text-center" />
       </section>
 
       {/* Why us */}

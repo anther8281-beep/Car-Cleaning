@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
+import { QuoteNote } from "@/components/quote-note";
 
 export const metadata: Metadata = { title: "Services" };
 
@@ -13,6 +14,8 @@ export default async function ServicesPage() {
       <p className="mt-2 text-[var(--muted)]">
         Choose the level of care your vehicle deserves.
       </p>
+
+      <QuoteNote className="mt-4" />
 
       <div className="mt-10 space-y-4">
         {settings.services.map((service) => (
