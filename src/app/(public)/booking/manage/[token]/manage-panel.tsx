@@ -102,6 +102,8 @@ function RescheduleForm({
   const [closed, setClosed] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Fetch availability whenever the chosen date changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!date) {
       setSlots([]);
@@ -122,6 +124,7 @@ function RescheduleForm({
       active = false;
     };
   }, [date]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <form action={formAction} className="space-y-4">

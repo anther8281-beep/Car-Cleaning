@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.github
+npm-debug.log*
+.env
+.env.*
+!.env.example
+Dockerfile
+.dockerignore
+*.md
+Claude_Code_Website_Specification.docx
+coverage
+.vscode
+.idea

@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: caruser
+      POSTGRES_PASSWORD: carpass
+      POSTGRES_DB: car_cleaning
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U caruser -d car_cleaning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://caruser:carpass@db:5432/car_cleaning?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-dev-secret-change-me-please-32bytes-minimum!}
+      NEXTAUTH_SECRET: ${AUTH_SECRET:-dev-secret-change-me-please-32bytes-minimum!}
+      NEXTAUTH_URL: ${APP_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      OWNER_EMAIL: ${OWNER_EMAIL:-owner@example.com}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-owner@example.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-ChangeMe!2026}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Hernandez Auto Detailing <no-reply@example.com>}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

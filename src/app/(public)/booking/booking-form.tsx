@@ -32,6 +32,8 @@ export function BookingForm({
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  // Fetch availability whenever the chosen date changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!date) {
       setSlots([]);
@@ -54,6 +56,7 @@ export function BookingForm({
       active = false;
     };
   }, [date]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

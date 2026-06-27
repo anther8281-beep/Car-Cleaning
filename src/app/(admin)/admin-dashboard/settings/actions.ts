@@ -11,7 +11,7 @@ export async function updateSettings(
   _prev: SettingsState,
   formData: FormData,
 ): Promise<SettingsState> {
-  const session = await requireUser();
+  await requireUser();
 
   let services: unknown;
   let hours: unknown;
