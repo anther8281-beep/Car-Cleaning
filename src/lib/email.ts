@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import type { Appointment } from "@/generated/prisma/client";
 import type { SiteSettings } from "@/lib/settings";
+import { formatTime } from "@/lib/time";
 
 type MailInput = {
   to: string;
@@ -86,7 +87,7 @@ function detailsTable(a: Appointment): string {
     ["Name", a.customerName],
     ["Service", a.service],
     ["Date", formatDate(a.date)],
-    ["Time", a.time],
+    ["Time", formatTime(a.time)],
     ["Phone", a.phone],
     ["Email", a.email],
   ];

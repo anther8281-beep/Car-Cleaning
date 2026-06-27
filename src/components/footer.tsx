@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/lib/settings";
 import { WEEKDAYS, WEEKDAY_LABELS } from "@/lib/types";
+import { formatTimeRange } from "@/lib/time";
 
 export function Footer({ settings }: { settings: SiteSettings }) {
   const year = new Date().getFullYear();
@@ -90,7 +91,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
                 <li key={day} className="flex justify-between gap-4">
                   <span>{WEEKDAY_LABELS[day]}</span>
                   <span className="text-[var(--foreground)]">
-                    {h ? `${h.open} – ${h.close}` : "Closed"}
+                    {h ? formatTimeRange(h.open, h.close) : "Closed"}
                   </span>
                 </li>
               );

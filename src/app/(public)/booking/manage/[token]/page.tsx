@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ManagePanel } from "./manage-panel";
+import { formatTime } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Manage your booking" };
 
@@ -53,7 +54,9 @@ export default async function ManageBookingPage({
           </div>
           <div className="flex justify-between">
             <dt>Time</dt>
-            <dd className="text-[var(--foreground)]">{appointment.time}</dd>
+            <dd className="text-[var(--foreground)]">
+              {formatTime(appointment.time)}
+            </dd>
           </div>
           <div className="flex justify-between">
             <dt>Name</dt>

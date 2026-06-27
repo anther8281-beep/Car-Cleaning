@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Service } from "@/lib/types";
+import { formatTime } from "@/lib/time";
 
 type AvailabilityResponse = {
   date: string;
@@ -201,7 +202,7 @@ export function BookingForm({
                       : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--primary)]"
                   }`}
                 >
-                  {slot}
+                  {formatTime(slot)}
                 </button>
               ))}
             </div>

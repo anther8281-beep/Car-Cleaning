@@ -8,6 +8,7 @@ import {
   setAppointmentStatus,
   setAdminNotes,
 } from "./actions";
+import { formatTime } from "@/lib/time";
 
 type Appt = {
   id: string;
@@ -53,7 +54,9 @@ export function AppointmentRow({ appointment }: { appointment: Appt }) {
       <tr className="border-b border-[var(--border)] last:border-0">
         <td className="px-4 py-3 text-[var(--foreground)]">
           <div className="font-medium">{appointment.date}</div>
-          <div className="text-xs text-[var(--muted)]">{appointment.time}</div>
+          <div className="text-xs text-[var(--muted)]">
+            {formatTime(appointment.time)}
+          </div>
         </td>
         <td className="px-4 py-3">
           <button

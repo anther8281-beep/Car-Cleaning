@@ -6,6 +6,7 @@ import {
   rescheduleBooking,
   type ManageState,
 } from "./actions";
+import { formatTime } from "@/lib/time";
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -179,7 +180,7 @@ function RescheduleForm({
                       : "border-[var(--border)] text-[var(--foreground)]"
                   }`}
                 >
-                  {s}
+                  {formatTime(s)}
                 </button>
               ))}
             </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
+import { formatTime } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export default async function AdminDashboardPage() {
                       {a.customerName} — {a.service}
                     </div>
                     <div className="text-[var(--muted)]">
-                      {a.date.toISOString().slice(0, 10)} at {a.time}
+                      {a.date.toISOString().slice(0, 10)} at {formatTime(a.time)}
                     </div>
                   </div>
                   <span
