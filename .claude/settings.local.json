@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"exit: $?\")",
+      "Read(//home/anther8281/**)",
+      "Bash(git clone *)",
+      "Bash(apt list *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(python3 -m pip install python-docx -q)",
+      "Bash(python3 -c ' *)",
+      "Bash(sudo apt-get install -y python3-pip -q)",
+      "Bash(unzip -p Claude_Code_Website_Specification.docx word/document.xml)",
+      "Bash(python3 *)"
+    ]
+  }
+}
