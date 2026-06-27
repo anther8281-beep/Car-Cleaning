@@ -23,6 +23,7 @@
 - [x] **CP1** — Toolchain + Next.js scaffold + all deps installed + PROGRESS.md
 - [x] **CP2** — Prisma schema (4 models) + migration + seed (3 services, owner account)
 - [x] **CP3** — Auth + MFA: NextAuth v5 (split edge/node config), staged login (password→TOTP), MFA enrollment with QR, proxy route guard, audit log, rate limiter. `tsc` + `next build` both green.
+- [x] **CP4** — Public pages (Home, Services, About, Contact, Privacy, Terms) + Navbar/Footer + dark-light toggle (next-themes) + DB-driven brand colors + dynamic SEO metadata. Smoke-tested: home renders injected color + seeded data, admin redirects to login. Whole app is `force-dynamic` so admin edits apply immediately.
 
 ## ⚠️ More environment notes (auth)
 - **NextAuth v5 beta.31** — split config: `src/auth.config.ts` (edge-safe, no Prisma/bcrypt, used by `src/proxy.ts`) and `src/auth.ts` (full, Credentials provider). Session strategy MUST be `jwt` for Credentials. JWT module augmentation may not flow to callback types — coerced defensively in the session callback.
@@ -42,8 +43,8 @@
 - [x] 2. Scaffold Next.js project + checkpoint
 - [x] 3. Prisma schema + seed
 - [x] 4. Auth + MFA
-- [~] 5. Public pages + dynamic theming  ← in progress
-- [ ] 6. Booking + appointments API + notifications
+- [x] 5. Public pages + dynamic theming
+- [~] 6. Booking + appointments API + notifications  ← in progress
 - [ ] 7. Admin dashboard
 - [ ] 8. Security, error handling, health checks
 - [ ] 9. Tests, Docker, CI/CD, docs
