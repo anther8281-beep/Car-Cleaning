@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { updateSettings, type SettingsState } from "./actions";
 import {
   WEEKDAYS,
@@ -39,6 +39,16 @@ export function SettingsForm({ initial }: { initial: Initial }) {
   );
   const [services, setServices] = useState<Service[]>(initial.services);
   const [hours, setHours] = useState<WeekHours>(initial.hours);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+
+  // After a save attempt, scroll the result (success or error) into view — the
+  // Save button is far down a long form, so the message would otherwise be
+  // off-screen and look like nothing happened.
+  useEffect(() => {
+    if (state.ok || state.error) {
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [state]);
 
   function updateService(idx: number, patch: Partial<Service>) {
     setServices((prev) =>
@@ -339,13 +349,26 @@ export function SettingsForm({ initial }: { initial: Initial }) {
         </div>
       </Section>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-[var(--primary)] px-6 py-2 font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-      >
-        {pending ? "Saving…" : "Save settings"}
-      </button>
+      {/* Feedback shown right at the Save button so it's never off-screen. */}
+      <div ref={feedbackRef} className="space-y-3">
+        {state.ok ? (
+          <div className="rounded-md border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-700">
+            {state.ok}
+          </div>
+        ) : null}
+        {state.error ? (
+          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {state.error}
+          </div>
+        ) : null}
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md bg-[var(--primary)] px-6 py-2 font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+        >
+          {pending ? "Saving…" : "Save settings"}
+        </button>
+      </div>
     </form>
   );
 }

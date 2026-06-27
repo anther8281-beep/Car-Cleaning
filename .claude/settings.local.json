@@ -13,7 +13,8 @@
       "Bash(python3 -c ' *)",
       "Bash(sudo apt-get install -y python3-pip -q)",
       "Bash(unzip -p Claude_Code_Website_Specification.docx word/document.xml)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }

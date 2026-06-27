@@ -22,6 +22,13 @@ export async function updateSettings(
     return { error: "Could not read services or hours data." };
   }
 
+  // Be forgiving about logo URLs: a bare domain like "site.com/logo.png" gets
+  // an https:// prefix so it validates instead of failing the whole save.
+  let logoUrl = String(formData.get("logoUrl") ?? "").trim();
+  if (logoUrl && !/^https?:\/\//i.test(logoUrl)) {
+    logoUrl = `https://${logoUrl}`;
+  }
+
   const parsed = settingsSchema.safeParse({
     businessName: formData.get("businessName"),
     tagline: formData.get("tagline") ?? "",
@@ -31,7 +38,7 @@ export async function updateSettings(
     seoTitle: formData.get("seoTitle"),
     seoDescription: formData.get("seoDescription") ?? "",
     seoKeywords: formData.get("seoKeywords") ?? "",
-    logoUrl: formData.get("logoUrl") ?? "",
+    logoUrl,
     primaryColor: formData.get("primaryColor"),
     secondaryColor: formData.get("secondaryColor"),
     slotIntervalMin: formData.get("slotIntervalMin"),
@@ -42,8 +49,33 @@ export async function updateSettings(
   });
 
   if (!parsed.success) {
+    // Name the offending field so the user knows exactly what to fix.
+    const issue = parsed.error.issues[0];
+    const fieldLabels: Record<string, string> = {
+      businessName: "Business name",
+      tagline: "Tagline",
+      phone: "Phone",
+      contactEmail: "Contact email",
+      address: "Address",
+      seoTitle: "SEO title",
+      seoDescription: "SEO description",
+      seoKeywords: "SEO keywords",
+      logoUrl: "Logo URL",
+      primaryColor: "Primary color",
+      secondaryColor: "Secondary color",
+      slotIntervalMin: "Booking slot interval",
+      leadTimeHours: "Minimum lead time",
+      maxAdvanceDays: "Max advance booking",
+      services: "Services",
+      hours: "Business hours",
+    };
+    const top = issue?.path?.[0];
+    const label =
+      typeof top === "string" && fieldLabels[top] ? fieldLabels[top] : null;
     return {
-      error: parsed.error.issues[0]?.message ?? "Some fields are invalid.",
+      error: label
+        ? `${label}: ${issue?.message ?? "is invalid"}`
+        : (issue?.message ?? "Some fields are invalid."),
     };
   }
   const data = parsed.data;
@@ -66,11 +98,22 @@ export async function updateSettings(
     hours: data.hours,
   };
 
-  await prisma.settings.upsert({
-    where: { id: "singleton" },
-    update: fields,
-    create: { id: "singleton", ...fields },
-  });
+  try {
+    await prisma.settings.upsert({
+      where: { id: "singleton" },
+      update: fields,
+      create: { id: "singleton", ...fields },
+    });
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        msg: "settings_update_failed",
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
+    return { error: "Could not save — a server error occurred. Please try again." };
+  }
 
   // The whole site renders dynamically, but revalidate to drop any cached
   // copies of the layout/pages that read settings.
