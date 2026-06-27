@@ -1,0 +1,98 @@
+// Prisma schema for Hernandez Auto Detailing booking site.
+// Prisma 7 — uses the `prisma-client` generator (output to src/generated/prisma).
+// Models: User, Appointment, Settings, AuditLog.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  RESCHEDULED
+}
+
+/// Admin/owner accounts that can sign into the dashboard.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  totpSecret   String? // base32 TOTP secret; null until MFA is set up
+  mfaEnabled   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+/// A customer booking request. Created as PENDING; the owner approves/rejects.
+model Appointment {
+  id           String            @id @default(cuid())
+  customerName String
+  phone        String
+  email        String
+  service      String // service name snapshot at booking time
+  date         DateTime          @db.Date // booking day
+  time         String // "HH:mm" 24h slot start
+  notes        String?
+  status       AppointmentStatus @default(PENDING)
+  // Random token used to authorize customer self-service reschedule/cancel links.
+  manageToken  String            @unique @default(cuid())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([date, time])
+  @@index([status])
+  @@map("appointments")
+}
+
+/// Singleton row holding all admin-editable site configuration.
+model Settings {
+  id              String   @id @default("singleton")
+  businessName    String   @default("Hernandez Auto Detailing")
+  phone           String   @default("")
+  contactEmail    String   @default("")
+  /// Array of { id, name, description, durationMinutes, price }.
+  services        Json     @default("[]")
+  /// Object keyed by mon..sun -> { open: "HH:mm", close: "HH:mm" } | null.
+  hours           Json     @default("{}")
+  logoUrl         String?
+  primaryColor    String   @default("#1a2e5a")
+  secondaryColor  String   @default("#c9a84c")
+  seoTitle        String   @default("Hernandez Auto Detailing")
+  seoDescription  String   @default("Professional car detailing. Book your appointment online.")
+  slotIntervalMin Int      @default(60) // booking slot granularity in minutes
+  updatedAt       DateTime @updatedAt
+
+  @@map("settings")
+}
+
+/// Append-only audit trail for admin actions and security events.
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // e.g. "appointment.approve", "settings.update", "auth.login"
+  target    String? // affected entity id/description
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}

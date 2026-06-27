@@ -21,12 +21,20 @@
 
 ## Checkpoints (git commits)
 - [x] **CP1** — Toolchain + Next.js scaffold + all deps installed + PROGRESS.md
+- [x] **CP2** — Prisma schema (4 models) + migration + seed (3 services, owner account)
+
+## ⚠️ More environment notes (discovered during build)
+- **Prisma 7 requires a driver adapter** — `@prisma/adapter-pg` (`PrismaPg`). Construct clients as `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })`. The schema datasource has NO `url`; URL is supplied at runtime via the adapter and to the CLI via `prisma.config.ts` (`datasource.url`).
+- Generated client imports from `@/generated/prisma/client` (PrismaClient, enums `Role`/`AppointmentStatus`, model types, `Prisma`).
+- Seed config is `migrations.seed` in `prisma.config.ts`; seed script needs its own `import "dotenv/config"`.
+- **Local dev DB**: PostgreSQL 17 installed via apt and running. DB `car_cleaning`, user `caruser`, pass `carpass`. Start with `sudo pg_ctlcluster 17 main start`. This is only for local dev/migrations — production is Supabase.
+- Seed admin: `anther8281@gmail.com` / `ChangeMe!2026` (temp, change on first login).
 
 ## Task status
 - [x] 1. Install toolchain (Node.js)
-- [~] 2. Scaffold Next.js project + checkpoint  ← in progress
-- [ ] 3. Prisma schema + seed
-- [ ] 4. Auth + MFA
+- [x] 2. Scaffold Next.js project + checkpoint
+- [x] 3. Prisma schema + seed
+- [~] 4. Auth + MFA  ← in progress
 - [ ] 5. Public pages + dynamic theming
 - [ ] 6. Booking + appointments API + notifications
 - [ ] 7. Admin dashboard
