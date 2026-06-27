@@ -40,6 +40,14 @@
 - **Remaining once unblocked**: set Vercel env (DATABASE_URL, AUTH_SECRET, NEXTAUTH_SECRET, AUTH_TRUST_HOST=true, APP_URL, NEXTAUTH_URL, OWNER_EMAIL=anther8281@gmail.com, EMAIL_FROM; EMAIL_* empty = console fallback) → `vercel deploy --prod` → set APP_URL/NEXTAUTH_URL to the assigned domain → redeploy → smoke test.
 - **⚠️ Secrets to rotate after deploy**: GitHub PAT, Vercel token, Supabase DB password (all pasted in chat).
 
+## 🚀 LIVE — deploy complete (2026-06-27)
+- **Production URL**: https://hernandez-auto-detailing.vercel.app (Vercel project `hernandez-auto-detailing`, scope `anther8281-1771s-projects`).
+- **DB**: Supabase pooler `aws-1-us-west-2.pooler.supabase.com:6543` (transaction mode, `?pgbouncer=true`), user `postgres.xngbeursemwmmajmftmc`. Health endpoint green, full booking write-path verified on prod (create→PENDING with duration/price snapshot, audit log w/ IP).
+- **Two deploy gotchas fixed**: (1) project created via `project add` had `framework: null` → all routes 404; fixed via API PATCH `framework: nextjs` + redeploy. (2) Vercel Deployment Protection (SSO) was ON → public 404/302; disabled via API PATCH `ssoProtection: null` (user-authorized).
+- **Env vars set on Vercel (production)**: DATABASE_URL, AUTH_SECRET, NEXTAUTH_SECRET, AUTH_TRUST_HOST=true, APP_URL, NEXTAUTH_URL (both = prod URL), OWNER_EMAIL, EMAIL_FROM. **EMAIL_* SMTP not set → emails log to console (won't actually send until SMTP configured).**
+- **Prod owner login**: anther8281@gmail.com / `Hzd-1SSjWBlI-26` (change on first login; MFA enrollment required).
+- **Smoke test**: 8/8 routes correct, DB up, seeded data + brand color render.
+
 ## ⚠️ Security notes
 - CSP nonce passed to next-themes via `ThemeProvider nonce={...}` (root layout reads `x-nonce` header). `style-src 'unsafe-inline'` is intentional (covers the brand-color `<style>` + framework inline styles); `script-src` stays strict (nonce + strict-dynamic). No inline `style={{}}` attributes exist in components, so this is safe.
 - Proxy matcher is now broad (all pages except api/_next/static/image/favicon) to apply CSP everywhere; auth redirects still keyed on pathname. `/api/*` has no CSP by design.
