@@ -21,18 +21,25 @@ enum AppointmentStatus {
   CONFIRMED
   CANCELLED
   RESCHEDULED
+  COMPLETED
+  NO_SHOW
 }
 
 /// Admin/owner accounts that can sign into the dashboard.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(ADMIN)
-  totpSecret   String? // base32 TOTP secret; null until MFA is set up
-  mfaEnabled   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String? // display name for the dashboard
+  passwordHash     String
+  role             Role      @default(ADMIN)
+  totpSecret       String? // base32 TOTP secret; null until MFA is set up
+  mfaEnabled       Boolean   @default(false)
+  recoveryCodes    String[]  @default([]) // bcrypt-hashed single-use MFA backup codes
+  failedLoginCount Int       @default(0) // consecutive failed logins (brute-force guard)
+  lockedUntil      DateTime? // when set & in the future, login is blocked
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   auditLogs AuditLog[]
 
@@ -41,19 +48,22 @@ model User {
 
 /// A customer booking request. Created as PENDING; the owner approves/rejects.
 model Appointment {
-  id           String            @id @default(cuid())
-  customerName String
-  phone        String
-  email        String
-  service      String // service name snapshot at booking time
-  date         DateTime          @db.Date // booking day
-  time         String // "HH:mm" 24h slot start
-  notes        String?
-  status       AppointmentStatus @default(PENDING)
+  id              String            @id @default(cuid())
+  customerName    String
+  phone           String
+  email           String
+  service         String // service name snapshot at booking time
+  durationMinutes Int               @default(60) // snapshot of service duration
+  priceCents      Int               @default(0) // snapshot of service price (cents)
+  date            DateTime          @db.Date // booking day
+  time            String // "HH:mm" 24h slot start
+  notes           String? // customer-provided notes
+  adminNotes      String? // internal notes, not shown to the customer
+  status          AppointmentStatus @default(PENDING)
   // Random token used to authorize customer self-service reschedule/cancel links.
-  manageToken  String            @unique @default(cuid())
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  manageToken     String            @unique @default(cuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@index([date, time])
   @@index([status])
@@ -64,8 +74,10 @@ model Appointment {
 model Settings {
   id              String   @id @default("singleton")
   businessName    String   @default("Hernandez Auto Detailing")
+  tagline         String   @default("Professional auto detailing, done right.")
   phone           String   @default("")
   contactEmail    String   @default("")
+  address         String   @default("")
   /// Array of { id, name, description, durationMinutes, price }.
   services        Json     @default("[]")
   /// Object keyed by mon..sun -> { open: "HH:mm", close: "HH:mm" } | null.
@@ -75,7 +87,10 @@ model Settings {
   secondaryColor  String   @default("#c9a84c")
   seoTitle        String   @default("Hernandez Auto Detailing")
   seoDescription  String   @default("Professional car detailing. Book your appointment online.")
+  seoKeywords     String   @default("car detailing, auto detailing, car wash")
   slotIntervalMin Int      @default(60) // booking slot granularity in minutes
+  leadTimeHours   Int      @default(12) // earliest a slot can be booked from now
+  maxAdvanceDays  Int      @default(60) // furthest ahead a slot can be booked
   updatedAt       DateTime @updatedAt
 
   @@map("settings")
@@ -90,6 +105,7 @@ model AuditLog {
   target    String? // affected entity id/description
   metadata  Json?
   ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
 
   @@index([createdAt])

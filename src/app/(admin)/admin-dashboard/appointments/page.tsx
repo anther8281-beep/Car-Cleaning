@@ -92,9 +92,12 @@ export default async function AppointmentsPage({
                     phone: a.phone,
                     email: a.email,
                     service: a.service,
+                    durationMinutes: a.durationMinutes,
+                    priceCents: a.priceCents,
                     date: a.date.toISOString().slice(0, 10),
                     time: a.time,
                     notes: a.notes,
+                    adminNotes: a.adminNotes,
                     status: a.status,
                   }}
                 />

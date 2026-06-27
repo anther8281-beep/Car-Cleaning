@@ -14,7 +14,7 @@ export default async function HomePage() {
             {settings.businessName}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
-            {settings.seoDescription}
+            {settings.tagline || settings.seoDescription}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link

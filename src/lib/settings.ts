@@ -25,8 +25,10 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     return {
       id: "singleton",
       businessName: "Hernandez Auto Detailing",
+      tagline: "Professional auto detailing, done right.",
       phone: "",
       contactEmail: "",
+      address: "",
       services: DEFAULT_SERVICES,
       hours: DEFAULT_HOURS,
       logoUrl: null,
@@ -35,7 +37,10 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
       seoTitle: "Hernandez Auto Detailing",
       seoDescription:
         "Professional car detailing. Book your appointment online.",
+      seoKeywords: "car detailing, auto detailing, car wash",
       slotIntervalMin: 60,
+      leadTimeHours: 12,
+      maxAdvanceDays: 60,
       updatedAt: new Date(),
     };
   }

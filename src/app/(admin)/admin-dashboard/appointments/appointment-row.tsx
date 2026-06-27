@@ -6,6 +6,7 @@ import {
   rejectAppointment,
   deleteAppointment,
   setAppointmentStatus,
+  setAdminNotes,
 } from "./actions";
 
 type Appt = {
@@ -14,17 +15,31 @@ type Appt = {
   phone: string;
   email: string;
   service: string;
+  durationMinutes: number;
+  priceCents: number;
   date: string;
   time: string;
   notes: string | null;
+  adminNotes: string | null;
   status: string;
 };
+
+const STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "CANCELLED",
+  "RESCHEDULED",
+  "COMPLETED",
+  "NO_SHOW",
+];
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-100 text-amber-800",
   CONFIRMED: "bg-green-100 text-green-800",
   CANCELLED: "bg-red-100 text-red-800",
   RESCHEDULED: "bg-blue-100 text-blue-800",
+  COMPLETED: "bg-emerald-100 text-emerald-800",
+  NO_SHOW: "bg-gray-200 text-gray-700",
 };
 
 export function AppointmentRow({ appointment }: { appointment: Appt }) {
@@ -116,6 +131,11 @@ export function AppointmentRow({ appointment }: { appointment: Appt }) {
                   {appointment.notes}
                 </div>
               ) : null}
+              <div>
+                <span className="text-[var(--muted)]">Service:</span>{" "}
+                {appointment.durationMinutes} min · $
+                {(appointment.priceCents / 100).toFixed(0)}
+              </div>
               <div className="sm:col-span-2">
                 <label className="text-[var(--muted)]">Set status: </label>
                 <select
@@ -128,14 +148,29 @@ export function AppointmentRow({ appointment }: { appointment: Appt }) {
                   }
                   className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
                 >
-                  {["PENDING", "CONFIRMED", "CANCELLED", "RESCHEDULED"].map(
-                    (s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ),
-                  )}
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
                 </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-[var(--muted)]">
+                  Internal notes (not shown to customer):
+                </label>
+                <textarea
+                  defaultValue={appointment.adminNotes ?? ""}
+                  disabled={pending}
+                  rows={2}
+                  onBlur={(e) =>
+                    startTransition(() =>
+                      setAdminNotes(appointment.id, e.target.value),
+                    )
+                  }
+                  placeholder="Save by clicking away…"
+                  className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
+                />
               </div>
             </div>
           </td>

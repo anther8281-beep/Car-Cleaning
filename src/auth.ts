@@ -5,6 +5,7 @@ import { z } from "zod";
 import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 import { verifyTotp } from "@/lib/auth/totp";
+import { consumeRecoveryCode } from "@/lib/auth/recovery";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -34,12 +35,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         if (!user) return null;
 
+        // Reject while the account is locked (brute-force guard).
+        if (user.lockedUntil && user.lockedUntil > new Date()) return null;
+
         const passwordOk = await compare(password, user.passwordHash);
         if (!passwordOk) return null;
 
         if (user.mfaEnabled) {
           if (!user.totpSecret || !token) return null;
-          if (!verifyTotp(user.totpSecret, token)) return null;
+          // Accept either a TOTP code or a single-use recovery code.
+          const second =
+            verifyTotp(user.totpSecret, token) ||
+            (await consumeRecoveryCode(user.id, token));
+          if (!second) return null;
         }
 
         return {

@@ -6,9 +6,12 @@ import { AuthError } from "next-auth";
 import { compare } from "bcryptjs";
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { verifyTotp } from "@/lib/auth/totp";
 import { rateLimit, resetRateLimit } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
+
+// Lock the account after this many consecutive failed passwords.
+const MAX_FAILED_LOGINS = 5;
+const LOCK_MINUTES = 15;
 
 export type LoginState = {
   stage: "credentials" | "mfa";
@@ -43,44 +46,80 @@ export async function authenticate(
     };
   }
 
+  const userAgent = hdrs.get("user-agent") ?? undefined;
   const user = await prisma.user.findUnique({ where: { email } });
+
+  // Account lockout guard (in addition to IP rate limiting).
+  if (user?.lockedUntil && user.lockedUntil > new Date()) {
+    await logAudit({
+      userId: user.id,
+      action: "auth.login.locked",
+      target: email,
+      ipAddress: ip,
+      userAgent,
+    });
+    return {
+      stage: "credentials",
+      error: "Account temporarily locked due to failed attempts. Try again later.",
+    };
+  }
+
   const passwordOk = user ? await compare(password, user.passwordHash) : false;
 
   if (!user || !passwordOk) {
+    if (user) {
+      const failed = user.failedLoginCount + 1;
+      const lock = failed >= MAX_FAILED_LOGINS;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginCount: lock ? 0 : failed,
+          lockedUntil: lock
+            ? new Date(Date.now() + LOCK_MINUTES * 60 * 1000)
+            : null,
+        },
+      });
+    }
     await logAudit({
+      userId: user?.id,
       action: "auth.login.failed",
       target: email,
       ipAddress: ip,
+      userAgent,
     });
     return { stage: "credentials", error: "Invalid email or password." };
   }
 
-  // Password is correct — enforce MFA when enabled.
-  if (user.mfaEnabled) {
-    if (!token) {
-      return { stage: "mfa" };
-    }
-    if (!user.totpSecret || !verifyTotp(user.totpSecret, token)) {
-      return { stage: "mfa", error: "Invalid authenticator code." };
-    }
+  // Password is correct — ask for the second factor when MFA is enabled.
+  if (user.mfaEnabled && !token) {
+    return { stage: "mfa" };
   }
 
-  // All factors satisfied — establish the session.
+  // Establish the session. authorize() verifies the second factor (TOTP or a
+  // single-use recovery code) and consumes recovery codes.
   try {
     await signIn("credentials", { email, password, token, redirect: false });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { stage: "credentials", error: "Could not sign in." };
+      return user.mfaEnabled
+        ? { stage: "mfa", error: "Invalid authenticator or recovery code." }
+        : { stage: "credentials", error: "Could not sign in." };
     }
     throw error;
   }
 
+  // Success — clear lockout counters and record the login.
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
+  });
   resetRateLimit(`login:${email}:${ip}`);
   await logAudit({
     userId: user.id,
     action: "auth.login.success",
     target: email,
     ipAddress: ip,
+    userAgent,
   });
 
   // First-time users (no MFA yet) are sent to set it up.

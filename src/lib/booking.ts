@@ -80,24 +80,41 @@ export async function getAvailability(
   const dayHours = s.hours[weekdayOf(date)];
   if (!dayHours) return { date: dateStr, closed: true, slots: [] };
 
+  // Reject dates beyond the booking window.
+  if (!withinAdvanceWindow(date, s.maxAdvanceDays)) {
+    return { date: dateStr, closed: true, slots: [] };
+  }
+
   const all = generateSlots(dayHours, s.slotIntervalMin);
   const taken = await bookedTimes(date);
 
-  // For today, drop slots already in the past.
-  const now = new Date();
-  const isToday = dateStr === now.toISOString().slice(0, 10);
-  const nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+  // Earliest bookable moment: now + the configured lead time.
+  const earliest = Date.now() + s.leadTimeHours * 60 * 60 * 1000;
 
   const slots = all.filter((slot) => {
     if (taken.has(slot)) return false;
-    if (isToday && timeToMinutes(slot) <= nowMin) return false;
+    if (slotEpoch(dateStr, slot) < earliest) return false;
     return true;
   });
 
   return { date: dateStr, closed: false, slots };
 }
 
-/** Validate a requested slot is within open hours and not double-booked. */
+/** UTC epoch (ms) of a date + "HH:mm" slot. */
+function slotEpoch(dateStr: string, time: string): number {
+  return new Date(`${dateStr}T${time}:00.000Z`).getTime();
+}
+
+/** True if `date` is no further ahead than now + maxAdvanceDays. */
+function withinAdvanceWindow(date: Date, maxAdvanceDays: number): boolean {
+  const max = Date.now() + maxAdvanceDays * 24 * 60 * 60 * 1000;
+  return date.getTime() <= max;
+}
+
+/**
+ * Validate a requested slot is within open hours, inside the booking window
+ * (lead time + max advance), and not double-booked.
+ */
 export async function isSlotBookable(
   dateStr: string,
   time: string,
@@ -111,8 +128,12 @@ export async function isSlotBookable(
   if (!generateSlots(dayHours, settings.slotIntervalMin).includes(time)) {
     return false;
   }
+  if (!withinAdvanceWindow(date, settings.maxAdvanceDays)) return false;
+  const earliest = Date.now() + settings.leadTimeHours * 60 * 60 * 1000;
+  if (slotEpoch(dateStr, time) < earliest) return false;
+
   const taken = await bookedTimes(date, excludeId);
   return !taken.has(time);
 }
 
-export { WEEKDAYS };
+export { WEEKDAYS, slotEpoch, withinAdvanceWindow };

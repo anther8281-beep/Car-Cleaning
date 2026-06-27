@@ -61,14 +61,19 @@ export const weekHoursSchema = z.object({
 
 export const settingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required").max(200),
+  tagline: z.string().trim().max(200),
   phone: z.string().trim().max(40),
   contactEmail: z.string().trim().email("Invalid email").or(z.literal("")),
+  address: z.string().trim().max(300),
   seoTitle: z.string().trim().min(1, "SEO title is required").max(200),
   seoDescription: z.string().trim().max(400),
+  seoKeywords: z.string().trim().max(400),
   logoUrl: z.string().trim().url("Must be a valid URL").or(z.literal("")),
   primaryColor: hexColor,
   secondaryColor: hexColor,
   slotIntervalMin: z.coerce.number().int().min(15).max(240),
+  leadTimeHours: z.coerce.number().int().min(0).max(720),
+  maxAdvanceDays: z.coerce.number().int().min(1).max(365),
   services: z.array(serviceSchema).max(50),
   hours: weekHoursSchema,
 });

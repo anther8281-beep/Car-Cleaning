@@ -29,6 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · ${settings.businessName}`,
     },
     description: settings.seoDescription,
+    keywords: settings.seoKeywords
+      ? settings.seoKeywords.split(",").map((k) => k.trim())
+      : undefined,
     openGraph: {
       title: settings.seoTitle,
       description: settings.seoDescription,

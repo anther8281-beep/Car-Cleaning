@@ -34,6 +34,11 @@ export function Footer({ settings }: { settings: SiteSettings }) {
               </a>
             </p>
           ) : null}
+          {settings.address ? (
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              {settings.address}
+            </p>
+          ) : null}
         </div>
 
         <div>

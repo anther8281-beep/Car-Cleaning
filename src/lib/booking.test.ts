@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { generateSlots, parseDateOnly, weekdayOf } from "./booking";
+import {
+  generateSlots,
+  parseDateOnly,
+  weekdayOf,
+  slotEpoch,
+  withinAdvanceWindow,
+} from "./booking";
 
 describe("parseDateOnly", () => {
   it("parses a valid YYYY-MM-DD into a UTC-midnight date", () => {
@@ -41,5 +47,25 @@ describe("generateSlots", () => {
 
   it("returns no slots when the day is closed (null)", () => {
     expect(generateSlots(null, 60)).toEqual([]);
+  });
+});
+
+describe("slotEpoch", () => {
+  it("computes the UTC epoch of a date + time", () => {
+    expect(slotEpoch("2026-06-29", "09:00")).toBe(
+      Date.UTC(2026, 5, 29, 9, 0, 0),
+    );
+  });
+});
+
+describe("withinAdvanceWindow", () => {
+  it("accepts a date inside the window", () => {
+    const soon = new Date(Date.now() + 5 * 86400000);
+    expect(withinAdvanceWindow(soon, 60)).toBe(true);
+  });
+
+  it("rejects a date beyond the window", () => {
+    const far = new Date(Date.now() + 90 * 86400000);
+    expect(withinAdvanceWindow(far, 60)).toBe(false);
   });
 });

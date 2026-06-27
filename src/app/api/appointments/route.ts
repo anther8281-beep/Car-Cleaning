@@ -93,6 +93,8 @@ export async function POST(request: Request) {
           phone: input.phone,
           email: input.email,
           service: input.service,
+          durationMinutes: service.durationMinutes,
+          priceCents: Math.round(service.price * 100),
           date,
           time: input.time,
           notes: input.notes ? input.notes : null,

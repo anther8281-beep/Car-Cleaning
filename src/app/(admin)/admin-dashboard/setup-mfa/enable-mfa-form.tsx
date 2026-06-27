@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { enableMfa, type EnableMfaState } from "./actions";
 
 export function EnableMfaForm() {
@@ -8,6 +9,37 @@ export function EnableMfaForm() {
     enableMfa,
     {},
   );
+
+  // Once enabled, show the recovery codes once and stop the form.
+  if (state.recoveryCodes) {
+    return (
+      <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
+        <h2 className="text-lg font-semibold text-green-700">
+          Two-factor authentication enabled
+        </h2>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Save these recovery codes somewhere safe. Each can be used once to sign
+          in if you lose your authenticator. They won&apos;t be shown again.
+        </p>
+        <ul className="mt-4 grid grid-cols-2 gap-2 font-mono text-sm text-[var(--foreground)]">
+          {state.recoveryCodes.map((c) => (
+            <li
+              key={c}
+              className="rounded bg-[var(--surface-muted)] px-3 py-2 text-center tracking-widest"
+            >
+              {c}
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/admin-dashboard"
+          className="mt-6 inline-block rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+        >
+          I&apos;ve saved them — continue
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="mt-6 space-y-4">

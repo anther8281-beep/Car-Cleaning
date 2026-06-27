@@ -16,14 +16,19 @@ export default async function SettingsPage() {
       <SettingsForm
         initial={{
           businessName: settings.businessName,
+          tagline: settings.tagline,
           phone: settings.phone,
           contactEmail: settings.contactEmail,
+          address: settings.address,
           seoTitle: settings.seoTitle,
           seoDescription: settings.seoDescription,
+          seoKeywords: settings.seoKeywords,
           logoUrl: settings.logoUrl ?? "",
           primaryColor: settings.primaryColor,
           secondaryColor: settings.secondaryColor,
           slotIntervalMin: settings.slotIntervalMin,
+          leadTimeHours: settings.leadTimeHours,
+          maxAdvanceDays: settings.maxAdvanceDays,
           services: settings.services,
           hours: settings.hours,
         }}

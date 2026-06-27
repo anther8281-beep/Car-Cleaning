@@ -12,14 +12,19 @@ import {
 
 type Initial = {
   businessName: string;
+  tagline: string;
   phone: string;
   contactEmail: string;
+  address: string;
   seoTitle: string;
   seoDescription: string;
+  seoKeywords: string;
   logoUrl: string;
   primaryColor: string;
   secondaryColor: string;
   slotIntervalMin: number;
+  leadTimeHours: number;
+  maxAdvanceDays: number;
   services: Service[];
   hours: WeekHours;
 };
@@ -90,6 +95,13 @@ export function SettingsForm({ initial }: { initial: Initial }) {
               className={inputClass}
             />
           </Field>
+          <Field label="Tagline">
+            <input
+              name="tagline"
+              defaultValue={initial.tagline}
+              className={inputClass}
+            />
+          </Field>
           <Field label="Phone">
             <input
               name="phone"
@@ -102,6 +114,13 @@ export function SettingsForm({ initial }: { initial: Initial }) {
               name="contactEmail"
               type="email"
               defaultValue={initial.contactEmail}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Address">
+            <input
+              name="address"
+              defaultValue={initial.address}
               className={inputClass}
             />
           </Field>
@@ -146,6 +165,26 @@ export function SettingsForm({ initial }: { initial: Initial }) {
               className={inputClass}
             />
           </Field>
+          <Field label="Minimum lead time (hours)">
+            <input
+              name="leadTimeHours"
+              type="number"
+              min={0}
+              max={720}
+              defaultValue={initial.leadTimeHours}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Max advance booking (days)">
+            <input
+              name="maxAdvanceDays"
+              type="number"
+              min={1}
+              max={365}
+              defaultValue={initial.maxAdvanceDays}
+              className={inputClass}
+            />
+          </Field>
         </Grid>
       </Section>
 
@@ -163,6 +202,14 @@ export function SettingsForm({ initial }: { initial: Initial }) {
             name="seoDescription"
             rows={2}
             defaultValue={initial.seoDescription}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="SEO keywords (comma-separated)">
+          <input
+            name="seoKeywords"
+            defaultValue={initial.seoKeywords}
+            placeholder="car detailing, auto detailing, car wash"
             className={inputClass}
           />
         </Field>

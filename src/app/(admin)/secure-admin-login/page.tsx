@@ -23,7 +23,7 @@ export default function SecureAdminLoginPage() {
         </h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
           {onMfaStage
-            ? "Enter the 6-digit code from your authenticator app."
+            ? "Enter the 6-digit code from your authenticator app, or a recovery code."
             : "Restricted area. Authorized staff only."}
         </p>
 
@@ -52,11 +52,10 @@ export default function SecureAdminLoginPage() {
                 <input
                   id="token"
                   name="token"
-                  inputMode="numeric"
                   autoComplete="one-time-code"
                   autoFocus
-                  maxLength={6}
-                  placeholder="123456"
+                  maxLength={9}
+                  placeholder="123456 or ABCD-EFGH"
                   className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 tracking-widest text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30"
                 />
               </div>

@@ -15,8 +15,10 @@ async function main() {
     create: {
       id: "singleton",
       businessName: "Hernandez Auto Detailing",
+      tagline: "Professional auto detailing, done right.",
       phone: "",
       contactEmail: process.env.OWNER_EMAIL ?? "",
+      address: "",
       services: DEFAULT_SERVICES,
       hours: DEFAULT_HOURS,
       primaryColor: "#1a2e5a",
@@ -24,6 +26,10 @@ async function main() {
       seoTitle: "Hernandez Auto Detailing | Professional Car Detailing",
       seoDescription:
         "Professional interior and exterior car detailing. Book your appointment online in minutes.",
+      seoKeywords:
+        "car detailing, auto detailing, mobile detailing, car wash, interior detailing",
+      leadTimeHours: 12,
+      maxAdvanceDays: 60,
     },
   });
   console.log("✔ Settings seeded");

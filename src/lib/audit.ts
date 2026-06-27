@@ -7,6 +7,7 @@ type AuditInput = {
   target?: string | null;
   metadata?: Prisma.InputJsonValue;
   ipAddress?: string | null;
+  userAgent?: string | null;
 };
 
 /**
@@ -22,6 +23,7 @@ export async function logAudit(input: AuditInput): Promise<void> {
         target: input.target ?? null,
         metadata: input.metadata,
         ipAddress: input.ipAddress ?? null,
+        userAgent: input.userAgent ?? null,
       },
     });
   } catch (err) {

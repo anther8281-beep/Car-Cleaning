@@ -26,6 +26,7 @@ export default async function BookingPage({
         <BookingForm
           services={settings.services}
           preselectedService={preselected ?? ""}
+          maxAdvanceDays={settings.maxAdvanceDays}
         />
       </div>
     </div>

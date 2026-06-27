@@ -74,6 +74,20 @@ export async function setAppointmentStatus(
   revalidatePath("/admin-dashboard/appointments");
 }
 
+export async function setAdminNotes(id: string, notes: string): Promise<void> {
+  const session = await requireUser();
+  await prisma.appointment.update({
+    where: { id },
+    data: { adminNotes: notes.trim() ? notes.trim().slice(0, 2000) : null },
+  });
+  await logAudit({
+    userId: session.user.id,
+    action: "appointment.admin_notes_updated",
+    target: id,
+  });
+  revalidatePath("/admin-dashboard/appointments");
+}
+
 export async function deleteAppointment(id: string): Promise<void> {
   const session = await requireUser();
   await prisma.appointment.delete({ where: { id } });

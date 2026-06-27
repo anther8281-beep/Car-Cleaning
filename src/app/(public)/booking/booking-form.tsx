@@ -11,13 +11,17 @@ type AvailabilityResponse = {
 };
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
+const maxDateStr = (days: number) =>
+  new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
 
 export function BookingForm({
   services,
   preselectedService,
+  maxAdvanceDays,
 }: {
   services: Service[];
   preselectedService: string;
+  maxAdvanceDays: number;
 }) {
   const router = useRouter();
   const [service, setService] = useState(
@@ -160,6 +164,7 @@ export function BookingForm({
           type="date"
           required
           min={todayStr()}
+          max={maxDateStr(maxAdvanceDays)}
           value={date}
           onChange={(e) => setDate(e.target.value)}
           className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/30"

@@ -58,14 +58,19 @@ describe("serviceSchema", () => {
 describe("settingsSchema", () => {
   const base = {
     businessName: "Hernandez Auto Detailing",
+    tagline: "",
     phone: "",
     contactEmail: "",
+    address: "",
     seoTitle: "Title",
     seoDescription: "",
+    seoKeywords: "",
     logoUrl: "",
     primaryColor: "#1a2e5a",
     secondaryColor: "#c9a84c",
     slotIntervalMin: "60",
+    leadTimeHours: "12",
+    maxAdvanceDays: "60",
     services: [],
     hours: {
       mon: { open: "08:00", close: "18:00" },

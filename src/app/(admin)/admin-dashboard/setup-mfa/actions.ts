@@ -1,9 +1,9 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 import { createTotpSecret, verifyTotp } from "@/lib/auth/totp";
+import { generateRecoveryCodes } from "@/lib/auth/recovery";
 import { logAudit } from "@/lib/audit";
 
 /**
@@ -30,7 +30,7 @@ export async function ensureTotpSecret(): Promise<string> {
   return secret;
 }
 
-export type EnableMfaState = { error?: string };
+export type EnableMfaState = { error?: string; recoveryCodes?: string[] };
 
 export async function enableMfa(
   _prev: EnableMfaState,
@@ -49,9 +49,11 @@ export async function enableMfa(
     return { error: "That code didn't match. Try the current code." };
   }
 
+  // Enable MFA and issue one-time recovery codes (shown once, stored hashed).
+  const { plain, hashed } = await generateRecoveryCodes();
   await prisma.user.update({
     where: { id: user.id },
-    data: { mfaEnabled: true },
+    data: { mfaEnabled: true, recoveryCodes: hashed },
   });
   await logAudit({
     userId: user.id,
@@ -59,5 +61,5 @@ export async function enableMfa(
     target: user.email,
   });
 
-  redirect("/admin-dashboard");
+  return { recoveryCodes: plain };
 }

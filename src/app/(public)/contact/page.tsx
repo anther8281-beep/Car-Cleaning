@@ -35,6 +35,10 @@ export default async function ContactPage() {
         </div>
       )}
 
+      {settings.address ? (
+        <p className="mt-3 text-sm text-[var(--muted)]">📍 {settings.address}</p>
+      ) : null}
+
       <div className="mt-8">
         <ContactForm />
       </div>
