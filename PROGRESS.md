@@ -26,6 +26,11 @@
 - [x] **CP4** — Public pages (Home, Services, About, Contact, Privacy, Terms) + Navbar/Footer + dark-light toggle (next-themes) + DB-driven brand colors + dynamic SEO metadata. Smoke-tested: home renders injected color + seeded data, admin redirects to login. Whole app is `force-dynamic` so admin edits apply immediately.
 - [x] **CP5** — Booking flow: booking page + form (live availability), appointments API (create=PENDING w/ transactional double-booking guard, availability endpoint), signed owner approve/reject email links, customer manage page (cancel/reschedule), contact API, Nodemailer email layer (console fallback when SMTP unset). **Runtime-tested end-to-end**: availability open/closed, create→PENDING + 2 emails, double-book→409, approve→CONFIRMED + email, bad token rejected.
 - [x] **CP6** — Admin dashboard: overview (stats + upcoming), appointments table (filter/expand/approve/cancel/delete/status + CSV export), settings editor (business info, branding colors, SEO, services add/edit/delete, per-day hours), audit log viewer, nav. **Runtime-tested authenticated**: logged in via credentials callback, all admin pages 200, CSV export auth-gated (307→login when anon), settings color change reflects on public home immediately.
+- [x] **CP7** — Security + reliability: nonce-based CSP (proxy generates per-request nonce, strict-dynamic script-src; merged with auth in proxy.ts), static security headers (HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, no X-Powered-By) in next.config.ts, error boundary + global-error + 404 not-found, structured JSON logger, `/api/health` DB probe. **Verified**: all headers present, all 23 script tags carry matching nonce (incl. next-themes script — JS not broken), health=200 db up, auth still 307s.
+
+## ⚠️ Security notes
+- CSP nonce passed to next-themes via `ThemeProvider nonce={...}` (root layout reads `x-nonce` header). `style-src 'unsafe-inline'` is intentional (covers the brand-color `<style>` + framework inline styles); `script-src` stays strict (nonce + strict-dynamic). No inline `style={{}}` attributes exist in components, so this is safe.
+- Proxy matcher is now broad (all pages except api/_next/static/image/favicon) to apply CSP everywhere; auth redirects still keyed on pathname. `/api/*` has no CSP by design.
 
 ## ⚠️ Auth testing recipe (works)
 To exercise the authenticated app via curl: GET `/api/auth/csrf` (cookie jar) → POST `/api/auth/callback/credentials` with `csrfToken,email,password,token=` (form-encoded) → sets `authjs.session-token` → reuse jar. Seed creds: anther8281@gmail.com / ChangeMe!2026. Note `/admin-dashboard/*` is proxy-protected so anon hits 307→login before any route-level 401.
@@ -55,8 +60,8 @@ To exercise the authenticated app via curl: GET `/api/auth/csrf` (cookie jar) �
 - [x] 5. Public pages + dynamic theming
 - [x] 6. Booking + appointments API + notifications
 - [x] 7. Admin dashboard
-- [~] 8. Security, error handling, health checks  ← in progress
-- [ ] 9. Tests, Docker, CI/CD, docs
+- [x] 8. Security, error handling, health checks
+- [~] 9. Tests, Docker, CI/CD, docs  ← in progress
 
 ## How to resume
 1. `cd /home/anther8281/Car-cleaning && git log --oneline` to see last checkpoint.
