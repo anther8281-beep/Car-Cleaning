@@ -31,6 +31,15 @@
 
 ## ✅ BUILD COMPLETE — all 9 tasks done. Generated Prisma client is gitignored (regenerated via postinstall/`db:generate`). `.env` gitignored. Local dev DB Postgres seeded with owner anther8281@gmail.com / ChangeMe!2026.
 
+## Post-build: enhancements (CP9) + DEPLOY (in progress)
+- **CP9 done & pushed**: folded valuable features from a pre-existing "Shine Auto Detailing" schema found in the user's Supabase project (lead time / max advance booking window, address, tagline, SEO keywords, COMPLETED/NO_SHOW statuses, adminNotes, service price/duration snapshot, account lockout, MFA recovery codes, lastLoginAt, audit userAgent). Skipped DB-session model + timestamp scheduling by design. 30 tests pass.
+- **GitHub**: pushed through CP9 (main @ 5a3cada) to anther8281-beep/Car-Cleaning via one-time PAT (network flaky — retry pushes 2-3x).
+- **Supabase (project xngbeursemwmmajmftmc, us-west-2, UTC)**: DONE via MCP — dropped the old incompatible schema, applied my full schema, enabled RLS deny-all (app uses direct Postgres role / Prisma which bypasses RLS), seeded settings (3 services) + owner anther8281@gmail.com (role OWNER). **Prod admin temp password: `Hzd-1SSjWBlI-26`** (change on first login; MFA required).
+- **Vercel**: CLI installed at node_modules/.bin/vercel; token works (scope `anther8281-1771`).
+- **⏳ BLOCKED**: need the Supabase DB connection string (with password) for Vercel `DATABASE_URL` — MCP can't read the password. Pooler form: `postgresql://postgres.xngbeursemwmmajmftmc:[PW]@aws-0-us-west-2.pooler.supabase.com:6543/postgres`.
+- **Remaining once unblocked**: set Vercel env (DATABASE_URL, AUTH_SECRET, NEXTAUTH_SECRET, AUTH_TRUST_HOST=true, APP_URL, NEXTAUTH_URL, OWNER_EMAIL=anther8281@gmail.com, EMAIL_FROM; EMAIL_* empty = console fallback) → `vercel deploy --prod` → set APP_URL/NEXTAUTH_URL to the assigned domain → redeploy → smoke test.
+- **⚠️ Secrets to rotate after deploy**: GitHub PAT, Vercel token, Supabase DB password (all pasted in chat).
+
 ## ⚠️ Security notes
 - CSP nonce passed to next-themes via `ThemeProvider nonce={...}` (root layout reads `x-nonce` header). `style-src 'unsafe-inline'` is intentional (covers the brand-color `<style>` + framework inline styles); `script-src` stays strict (nonce + strict-dynamic). No inline `style={{}}` attributes exist in components, so this is safe.
 - Proxy matcher is now broad (all pages except api/_next/static/image/favicon) to apply CSP everywhere; auth redirects still keyed on pathname. `/api/*` has no CSP by design.
