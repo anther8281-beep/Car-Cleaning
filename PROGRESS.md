@@ -24,6 +24,11 @@
 - [x] **CP2** — Prisma schema (4 models) + migration + seed (3 services, owner account)
 - [x] **CP3** — Auth + MFA: NextAuth v5 (split edge/node config), staged login (password→TOTP), MFA enrollment with QR, proxy route guard, audit log, rate limiter. `tsc` + `next build` both green.
 - [x] **CP4** — Public pages (Home, Services, About, Contact, Privacy, Terms) + Navbar/Footer + dark-light toggle (next-themes) + DB-driven brand colors + dynamic SEO metadata. Smoke-tested: home renders injected color + seeded data, admin redirects to login. Whole app is `force-dynamic` so admin edits apply immediately.
+- [x] **CP5** — Booking flow: booking page + form (live availability), appointments API (create=PENDING w/ transactional double-booking guard, availability endpoint), signed owner approve/reject email links, customer manage page (cancel/reschedule), contact API, Nodemailer email layer (console fallback when SMTP unset). **Runtime-tested end-to-end**: availability open/closed, create→PENDING + 2 emails, double-book→409, approve→CONFIRMED + email, bad token rejected.
+
+## ⚠️ Testing notes
+- Local dev DB occasionally has a **stale `npm start`** holding port 3000 → new starts fail `EADDRINUSE`. Kill via `ps aux|grep next-server` then `kill <pid>` before restarting.
+- To sign an approve/reject token manually for testing, HMAC-SHA256 the base64url payload `{appointmentId,action,exp}` with `AUTH_SECRET` (see token.ts). Inline `tsx -e` import of project files fails on path resolution — use a node crypto one-liner instead.
 
 ## ⚠️ More environment notes (auth)
 - **NextAuth v5 beta.31** — split config: `src/auth.config.ts` (edge-safe, no Prisma/bcrypt, used by `src/proxy.ts`) and `src/auth.ts` (full, Credentials provider). Session strategy MUST be `jwt` for Credentials. JWT module augmentation may not flow to callback types — coerced defensively in the session callback.
@@ -44,8 +49,8 @@
 - [x] 3. Prisma schema + seed
 - [x] 4. Auth + MFA
 - [x] 5. Public pages + dynamic theming
-- [~] 6. Booking + appointments API + notifications  ← in progress
-- [ ] 7. Admin dashboard
+- [x] 6. Booking + appointments API + notifications
+- [~] 7. Admin dashboard  ← in progress
 - [ ] 8. Security, error handling, health checks
 - [ ] 9. Tests, Docker, CI/CD, docs
 
