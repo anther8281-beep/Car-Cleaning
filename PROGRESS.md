@@ -48,6 +48,11 @@
 - **Prod owner login**: anther8281@gmail.com / `Hzd-1SSjWBlI-26` (change on first login; MFA enrollment required).
 - **Smoke test**: 8/8 routes correct, DB up, seeded data + brand color render.
 
+## ✉️ SMTP wired (Gmail) — 2026-06-27
+- Vercel prod env: `EMAIL_HOST=smtp.gmail.com`, `EMAIL_PORT=587`, `EMAIL_USER=anther8281@gmail.com`, `EMAIL_PASS=<gmail app password>`, `EMAIL_FROM="Hernandez Auto Detailing <anther8281@gmail.com>"`. Redeployed.
+- Verified: production booking POST returned 201 with no `email_send_failed` in runtime logs (emails are awaited before the response), i.e. Gmail accepted both customer + owner messages. Test bookings cleaned up.
+- **Rotate the Gmail App Password** too (myaccount.google.com/apppasswords) along with GitHub PAT / Vercel token / Supabase password — all pasted in chat.
+
 ## ⚠️ Security notes
 - CSP nonce passed to next-themes via `ThemeProvider nonce={...}` (root layout reads `x-nonce` header). `style-src 'unsafe-inline'` is intentional (covers the brand-color `<style>` + framework inline styles); `script-src` stays strict (nonce + strict-dynamic). No inline `style={{}}` attributes exist in components, so this is safe.
 - Proxy matcher is now broad (all pages except api/_next/static/image/favicon) to apply CSP everywhere; auth redirects still keyed on pathname. `/api/*` has no CSP by design.
