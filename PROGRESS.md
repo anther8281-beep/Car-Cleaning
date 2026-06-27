@@ -22,6 +22,13 @@
 ## Checkpoints (git commits)
 - [x] **CP1** — Toolchain + Next.js scaffold + all deps installed + PROGRESS.md
 - [x] **CP2** — Prisma schema (4 models) + migration + seed (3 services, owner account)
+- [x] **CP3** — Auth + MFA: NextAuth v5 (split edge/node config), staged login (password→TOTP), MFA enrollment with QR, proxy route guard, audit log, rate limiter. `tsc` + `next build` both green.
+
+## ⚠️ More environment notes (auth)
+- **NextAuth v5 beta.31** — split config: `src/auth.config.ts` (edge-safe, no Prisma/bcrypt, used by `src/proxy.ts`) and `src/auth.ts` (full, Credentials provider). Session strategy MUST be `jwt` for Credentials. JWT module augmentation may not flow to callback types — coerced defensively in the session callback.
+- **Next 16 renames Middleware → Proxy**: file is `src/proxy.ts` (default export wraps NextAuth `auth`). Same matcher/config API.
+- **otplib v13** new functional API: `generateSecret()`, `generateURI({strategy,issuer,label,secret})`, `verifySync({secret,token,epochTolerance})` → `{valid}`. Drift window is `epochTolerance` in SECONDS (not steps).
+- Login flow: password verified in a server action (staged), then `signIn(...,{redirect:false})`, then manual `redirect()`. First login (no MFA) → `/admin-dashboard/setup-mfa`.
 
 ## ⚠️ More environment notes (discovered during build)
 - **Prisma 7 requires a driver adapter** — `@prisma/adapter-pg` (`PrismaPg`). Construct clients as `new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })`. The schema datasource has NO `url`; URL is supplied at runtime via the adapter and to the CLI via `prisma.config.ts` (`datasource.url`).
@@ -34,8 +41,8 @@
 - [x] 1. Install toolchain (Node.js)
 - [x] 2. Scaffold Next.js project + checkpoint
 - [x] 3. Prisma schema + seed
-- [~] 4. Auth + MFA  ← in progress
-- [ ] 5. Public pages + dynamic theming
+- [x] 4. Auth + MFA
+- [~] 5. Public pages + dynamic theming  ← in progress
 - [ ] 6. Booking + appointments API + notifications
 - [ ] 7. Admin dashboard
 - [ ] 8. Security, error handling, health checks
